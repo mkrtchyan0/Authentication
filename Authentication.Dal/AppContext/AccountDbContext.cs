@@ -12,7 +12,6 @@ namespace Authentication.Dal.AppContext
         {
             _configuration = configuration;
         }
-
         public DbSet<ApplicationUserDal> Costumers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

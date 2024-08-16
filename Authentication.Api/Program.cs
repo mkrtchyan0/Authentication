@@ -59,7 +59,8 @@ namespace Authentication
 
             app.MapControllers();
 
-            app.Run();
+            app.MigrateContext<AccountDbContext>()
+                .Run();
         }
     }
 }
