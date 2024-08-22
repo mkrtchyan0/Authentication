@@ -1,22 +1,26 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
-namespace Authentication.Api.JwtToken
+namespace Authentication.Api.JwtTokenProviders
 {
-    public class JwtToken
+    public class JwtTokenProvider(IConfiguration config)
     {
-        public JwtToken(IConfiguration config) { _config = config; }
-        private IConfiguration _config;
-        public string Create()
+        private readonly IConfiguration _config = config;
+        public string Create(string role, string email)
         {
             var key = _config["Authentication:Schemes:Bearer:SigningKey"];
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key ?? "weak key"));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            var claims = new List<Claim> {
+                new(ClaimTypes.Role, role),
+                new(ClaimTypes.Email, email),
+            };
             var securityToken = new JwtSecurityToken(_config["Jwt:Issuer"],
               _config["Jwt:Issuer"],
-              null,
+              claims:claims,
               expires: DateTime.Now.AddMinutes(120),
               signingCredentials: credentials);
 

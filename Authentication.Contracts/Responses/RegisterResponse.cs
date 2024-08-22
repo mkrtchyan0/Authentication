@@ -2,6 +2,6 @@
 {
     public class RegisterResponse:AppResposne
     {
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 }

@@ -9,14 +9,12 @@ namespace Authentication.Extansions
         {
             builder.Services.AddDbContext<AccountDbContext>(options =>
              options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
-
             return services;
         }
         public static WebApplication MigrateContext<TContext>(this WebApplication app) where TContext : DbContext
         {
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
-            //var result = context.Database.EnsureCreated();
             if (!context.Database.EnsureCreated())
                 context.Database.Migrate();
             return app;

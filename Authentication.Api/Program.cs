@@ -1,10 +1,11 @@
 ﻿
-using Authentication.Api.JwtToken;
+using Authentication.Api.JwtTokenProviders;
 using Authentication.Dal.AppContext;
 using Authentication.Dal.Models;
 using Authentication.Extansions;
-using Authentication.Repository;
+using Authentication.Api.Repository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Authentication
 {
@@ -22,12 +23,22 @@ namespace Authentication
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddAccountContext(builder);
-            builder.Services.AddScoped<IApplicationInterface, ProductRepository>();
-            builder.Services.AddScoped<JwtToken>();
+            builder.Services.AddScoped<IApplicationInterface, UserRepository>();
+            builder.Services.AddSingleton<JwtTokenProvider>();
 
-            builder.Services.AddIdentity<ApplicationUserDal, IdentityRole>()
-            .AddEntityFrameworkStores<AccountDbContext>()
-            .AddDefaultTokenProviders();               
+            //builder.Services.AddIdentity<ApplicationUserDal, IdentityRole>()
+            //.AddEntityFrameworkStores<AccountDbContext>()
+            //.AddDefaultTokenProviders();               
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+                 //.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
+                 //.AddUserManager<UserManager<IdentityUser<Guid>>>()
+                 //.AddSignInManager<SignInManager<IdentityUser<Guid>>>()
+                .AddSignInManager<SignInManager<ApplicationUser>>()
+                .AddEntityFrameworkStores<AccountDbContext>()
+                .AddUserManager<UserManager<ApplicationUser>>()
+                .AddRoles<IdentityRole<Guid>>()
+                .AddRoleManager<RoleManager<IdentityRole<Guid>>>()
+                .AddDefaultTokenProviders();                
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
@@ -36,13 +47,11 @@ namespace Authentication
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 6;
-
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
-
                 options.User.RequireUniqueEmail = true;
             });
-
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
